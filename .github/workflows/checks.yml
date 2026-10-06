@@ -1,0 +1,27 @@
+name: CPU orchestration checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Isolated CPU checks (no model or engine install)
+        run: |
+          python -m venv .venv-checks
+          .venv-checks/bin/python -m unittest discover -s tests -v
+          for script in scripts/*.sh; do bash -n "$script"; done
+          PYTHON_BIN="$PWD/.venv-checks/bin/python" ./scripts/run_server.sh --experiment E0
+          PYTHON_BIN="$PWD/.venv-checks/bin/python" ./scripts/run_baseline.sh --experiment E1
+          PYTHON_BIN="$PWD/.venv-checks/bin/python" ./scripts/collect_metrics.sh

@@ -1,0 +1,30 @@
+{
+  "E0": {
+    "description": "S0: functional smoke only, not a performance conclusion",
+    "model": "smoke", "dataset": "random", "input_tokens": 256,
+    "output_tokens": 64, "num_requests": 30, "concurrency": 1,
+    "request_rate": "inf", "seed": 42, "prefix_cache": false,
+    "kv_bytes": 1073741824, "max_model_len": 1024,
+    "max_num_seqs": 4, "batch_tokens": 1024,
+    "cache_state": "not_controlled_pilot"
+  },
+  "E1": {
+    "description": "S1: shared-prefix pilot; formal cold/warm protocol still required",
+    "model": "primary", "dataset": "prefix_repetition",
+    "prefix_tokens": 2048, "suffix_tokens": 128, "num_prefixes": 8,
+    "output_tokens": 128, "num_requests": 200, "concurrency": 8,
+    "request_rate": "inf", "seed": 42, "prefix_cache": true,
+    "kv_bytes": 4294967296, "max_model_len": 9216,
+    "max_num_seqs": 32, "batch_tokens": 2048,
+    "cache_state": "not_controlled_pilot"
+  },
+  "E3": {
+    "description": "S2: long-context KV pressure; KV=4GiB initial point",
+    "model": "primary", "dataset": "random", "input_tokens": 8192,
+    "output_tokens": 128, "num_requests": 200, "concurrency": 32,
+    "request_rate": "inf", "seed": 42, "prefix_cache": false,
+    "kv_bytes": 4294967296, "max_model_len": 9216,
+    "max_num_seqs": 32, "batch_tokens": 2048,
+    "cache_state": "prefix_reuse_disabled"
+  }
+}

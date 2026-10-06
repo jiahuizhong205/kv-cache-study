@@ -1,0 +1,3 @@
+[submodule "vllm"]
+	path = engines/vllm
+	url = https://github.com/jiahuizhong205/vllm.git

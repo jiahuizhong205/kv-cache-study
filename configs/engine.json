@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "engine": "vllm",
+  "upstream_url": "https://github.com/vllm-project/vllm.git",
+  "research_url": "https://github.com/jiahuizhong205/vllm.git",
+  "baseline_sha": "9b2f34cad446f73b1699e8236ec0b611a65f48af",
+  "baseline_state": "candidate_unvalidated",
+  "python_target": "3.12",
+  "torch_version": null,
+  "cuda_runtime": null,
+  "attention_backend": null,
+  "notes": "Freeze actual compatible dependencies after GPU smoke test; never install floating latest as the validated baseline."
+}

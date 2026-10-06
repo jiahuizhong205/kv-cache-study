@@ -1,0 +1,21 @@
+# 指标与因果解释
+
+| 项目 | 口径 | 注意 |
+| --- | --- | --- |
+| TTFT | 客户端发送到首次有效内容输出 | 服务端起点可能不同，空角色 chunk 不计 |
+| TPOT | `(E2E-TTFT)/(输出token数-1)`，输出>1 | 不适用于只有一个输出 token |
+| ITL | 流式 chunk 到达间隔，或核实后的 token 间隔 | chunk 可能含多个 token |
+| 吞吐 | 完成请求/s、成功输出 token/s | 同时报失败/超时/未完成与窗口 |
+| KV usage | `vllm:kv_cache_usage_perc`，0–1 | 活跃/分配逻辑占用不等于所有历史前缀驻留 |
+| prefix hit | `prefix_cache_hits_total` / `prefix_cache_queries_total` 本轮增量 | token 口径，分母0记N/A，重启会reset |
+| preemption | `vllm:num_preemptions_total` 增量 | 事件数，不是独立请求数或重算token数 |
+| eviction/residency | 可选 `kv_block_*_seconds` histogram | 样本count不等于全量淘汰块数 |
+| recomputation | 需核实机制/日志/额外观测 | 暂无直接精确指标时记N/A |
+
+基础采集：官方 benchmark detailed JSON、服务 `/metrics`、GPU 每秒快照、服务日志。当前 collector 不自行计算精确 eviction 或 recomputation。
+
+使用率0.9应解释为90%，而不是0.9%。counter 要在同样 labels 下求增量；不能跨重启简单相减，不把 warmup 算入正式窗口。
+
+前缀淘汰可能导致重访 miss；活跃 KV 不足可能导致抢占；计算饱和也可能只导致排队。用容量干预、工作集轮换与到达率扫描分别验证，不预设 rate↑→eviction↑→TTFT↑ 必然成立。
+
+参考：[vLLM metrics](https://docs.vllm.ai/en/latest/usage/metrics/)。固定提交的实际 `/metrics` 优先；SGLang 后续需单独核对窗口/分母，不能直接比较同名 gauge。

@@ -1,0 +1,7 @@
+{
+  "smoke": {"id": "Qwen/Qwen2.5-1.5B-Instruct", "revision": null, "tokenizer_revision": null},
+  "primary": {"id": "Qwen/Qwen2.5-7B-Instruct", "revision": null, "tokenizer_revision": null},
+  "dtype": "bfloat16",
+  "kv_cache_dtype": "auto",
+  "state": "candidate_revisions_not_downloaded"
+}
