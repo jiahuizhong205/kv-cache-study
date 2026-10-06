@@ -31,6 +31,8 @@
 
 首轮以 A 组为主。模型推理不会更新权重，不需要先训练模型。B/C 组与 A 组共享评测协议，但不能直接修改 A 组的原版基线。
 
+通过 [Issues](https://github.com/jiahuizhong205/kv-cache-study/issues) 共享阅读与 A1/A2/A3 进度；成员写权限和具体负责人待提供账号后另行配置。
+
 ## 3. 目录结构
 
 ```text

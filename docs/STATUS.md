@@ -9,7 +9,7 @@
 - README、源码阅读路线、协作、基线与指标协议。
 - 无 GPU/模型依赖的编排测试与公开 CI。
 
-本地验证：23 项 unittest 通过；shell 语法检查通过；服务/压测/采集 dry-run 不启动模型。GitHub CI 的运行结果需另行核验，不代表 GPU 验证。
+本地验证：23 项 unittest 通过；shell 语法检查通过；服务/压测/采集 dry-run 不启动模型。初始化提交的 [GitHub CPU CI](https://github.com/jiahuizhong205/kv-cache-study/actions/runs/37460545796) 已通过；这不代表 GPU 验证。
 
 仓库创建期间独立源码镜像的历史上传遇到 HTTP 408，改用 `jiahuizhong205/vllm` 的真正 GitHub fork。最初创建的空仓库 `jiahuizhong205/vllm-kv-cache` 暂留，不参与实验，不作为子模块地址；未经另外授权不删除远程仓库。
 
@@ -26,6 +26,8 @@
 - [ ] 增加团队成员权限（需要成员账号）。
 
 ## 下一步：读源码
+
+共享进度入口：[实验仓库 Issues](https://github.com/jiahuizhong205/kv-cache-study/issues)。已建立源码阅读、A1 环境冻结、A2 正式前缀协议、A3 指标采集四项待办，未指定成员负责人。
 
 从 `docs/SOURCE_READING.md` 第一轮开始，提交一份阅读笔记。先理解配置、分配、命中与抢占，不修改原版引擎，不把读代码的推断标作实测。
 
