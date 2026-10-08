@@ -10,11 +10,11 @@
 - README、源码阅读路线、协作、基线与指标协议。
 - 无 GPU/模型依赖的编排测试与公开 CI。
 
-本地验证：27 项 unittest 通过，涵盖原版 tree、已提交源码变动、未提交变动和缺失源码的保护；源码导入 tree 与上游完全一致。此前 shell 语法检查与 dry-run 已通过；转换后的 GitHub CI 待确认。历史 [GitHub CPU CI](https://github.com/jiahuizhong205/kv-cache-study/actions/runs/37460899283) 已通过；这不代表 GPU 验证。
+本地验证：27 项 unittest 通过，涵盖原版 tree、已提交源码变动、未提交变动和缺失源码的保护；源码导入 tree 与上游完全一致，真实提交后的 baseline 保护通过，shell 语法检查通过。[单仓库转换 GitHub CPU CI](https://github.com/jiahuizhong205/kv-cache-study/actions/runs/37732535750) 已通过，覆盖测试和三个 dry-run；这不代表 GPU 验证。
 
-用户已授权删除独立 `jiahuizhong205/vllm` fork；删除结果待核验。实验主仓库不再依赖该 fork。最初创建的空仓库 `jiahuizhong205/vllm-kv-cache` 不参与实验，未纳入本次明确指定的远程 fork 删除范围。
+用户已授权删除独立 `jiahuizhong205/vllm` fork；已核验账号拥有 ADMIN、目标是官方项目的 fork，但 CLI 删除返回 HTTP 403，当前凭证缺少 `delete_repo` scope。因此远程 fork 尚未删除，不声称删除完成，需用户自行网页删除或先为 CLI 授予删除权限。实验主仓库不再依赖该 fork。最初创建的空仓库 `jiahuizhong205/vllm-kv-cache` 不参与实验，未纳入本次明确指定的远程 fork 删除范围。
 
-本地清理：旧的重复源码将由单仓库快照与已验证的 Git bundle 替代；历史规划、训练材料和子模块元数据移入 `.cleanup-backups/2026-10-08/`，不公开。`.venv-checks`、编辑器与工具配置仍有用途，保留。
+本地清理已完成：在核验 GitHub 中的完整源码 tree 后，删除旧 `vllm/` 重复副本；单仓库快照与已验证的 Git bundle 可用于恢复。历史规划、训练材料和子模块元数据已移入 `.cleanup-backups/2026-10-08/`，不公开。`.venv-checks`、编辑器与工具配置仍有用途，保留。
 
 ## 未执行或尚未验收
 
