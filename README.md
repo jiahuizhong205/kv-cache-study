@@ -7,19 +7,19 @@
 实验主仓库：[jiahuizhong205/kv-cache-study](https://github.com/jiahuizhong205/kv-cache-study)。
 现在采用 **一个 PUBLIC 单仓库**：完整 vLLM 源码直接保存在 `engines/vllm/`，不是子模块。可以在这里修改源码，和实验文件一起由主仓库提交、推送；不再依赖独立 fork。
 
-源码来自官方 `vllm-project/vllm` 的固定提交，未截取或重写引擎；上游 LICENSE、版权与源码保持原样。主仓库只运行 CPU 编排检查，导入目录内的上游 workflows 不会成为本仓库的 Actions。来源及完整性见 [源码溯源](docs/SOURCE_PROVENANCE.md)。
+源码来自官方 `vllm-project/vllm` 的固定提交，未截取或重写引擎；上游 LICENSE、版权与源码保持原样。主仓库只运行 CPU 编排检查，导入目录内的上游 workflows 不会成为本仓库的 Actions。来源及完整性见 [源码溯源](docs/源码溯源.md)。
 
 ## 1. 先从哪里开始
 
-准备阅读 vLLM 的同学，先看 [源码阅读路线](docs/SOURCE_READING.md)，从缓存配置、调度器、KV 管理器与 block pool 入手，不必立即租 GPU。
+准备阅读 vLLM 的同学，先看 [源码阅读路线](docs/源码阅读路线.md)，从缓存配置、调度器、KV 管理器与 block pool 入手，不必立即租 GPU。
 
 建议阅读顺序：
 
-1. [基线协议](docs/BASELINE_PROTOCOL.md)：我们固定什么、比较什么。
-2. [源码阅读路线](docs/SOURCE_READING.md)：代码入口、问题清单与笔记模板。
-3. [单仓库协作](docs/CONTRIBUTING.md)：源码修改如何提交、如何共享。
-4. [运行指南](docs/RUNBOOK.md)：审批之后如何安装、启动与采集。
-5. [指标口径](docs/METRICS.md)、[进度与审批](docs/STATUS.md)。
+1. [基线协议](docs/基线协议.md)：我们固定什么、比较什么。
+2. [源码阅读路线](docs/源码阅读路线.md)：代码入口、问题清单与笔记模板。
+3. [单仓库协作](docs/单仓库协作.md)：源码修改如何提交、如何共享。
+4. [运行指南](docs/运行指南.md)：审批之后如何安装、启动与采集。
+5. [指标口径](docs/指标口径.md)、[进度与审批](docs/进度与审批.md)。
 
 ## 2. 团队定位
 
@@ -43,6 +43,14 @@ kv-cache-study/
   workloads/              # workload 规则与实验矩阵
   analysis/               # 结果摘要工具与分析说明
   docs/                   # 协议、阅读、运行、指标、协作与进度
+    基线协议.md
+    源码阅读路线.md
+    单仓库协作.md
+    运行指南.md
+    指标口径.md
+    进度与审批.md
+    源码溯源.md
+    notes/笔记模板.md
   tests/                  # 不依赖 torch/GPU 的编排测试
   results/                # 脱敏汇总与图表
   results/raw/            # 本地原始结果，Git 忽略
@@ -62,7 +70,7 @@ Windows 本地实际根目录目前为 `C:\Users\zhongjiahui\Desktop\vllm`，源
 | 控制因素 | 前缀复用、KV 容量、输入长度、并发/到达率 |
 | 尚未冻结 | 模型与 tokenizer revision、实际 GPU/环境/后端 |
 
-第一轮准备 E0 冒烟、E1 前缀复用探索、E3 KV 压力。SGLang 与论文机制尚未接入。详细定义见 [基线协议](docs/BASELINE_PROTOCOL.md)。不能用一个模型名字或一次成功启动代替实验版本冻结。
+第一轮准备 E0 冒烟、E1 前缀复用探索、E3 KV 压力。SGLang 与论文机制尚未接入。详细定义见 [基线协议](docs/基线协议.md)。不能用一个模型名字或一次成功启动代替实验版本冻结。
 
 ## 5. 获取项目与日常更新
 
@@ -77,7 +85,7 @@ cd kv-cache-study
 git pull --ff-only
 ```
 
-不需要递归 clone、子模块同步或第二次提交。**需要修改时先建立主仓库开发分支**，详见 [协作指南](docs/CONTRIBUTING.md)。旧版子模块 checkout 的成员建议在另一个新目录重新 clone；先保留自己的修改，不要直接删除旧目录。
+不需要递归 clone、子模块同步或第二次提交。**需要修改时先建立主仓库开发分支**，详见 [单仓库协作](docs/单仓库协作.md)。旧版子模块 checkout 的成员建议在另一个新目录重新 clone；先保留自己的修改，不要直接删除旧目录。
 
 原版 baseline 以 `configs/engine.json` 的源码树哈希校验；修改引擎后直接运行原版入口会被拒绝。机制实验需要另行审批版本锁与对照方案，不能直接改锁以绕过检查。
 
@@ -93,7 +101,7 @@ PYTHON_BIN="$PWD/.venv-checks/bin/python" ./scripts/collect_metrics.sh
 .venv-checks/bin/python -m unittest discover -s tests -v
 ```
 
-默认只打印计划，不启动 GPU、不下载权重、不请求服务、不产生结果目录。实际执行须添加 `--execute` 并提供资源许可记录、固定模型 snapshot、revision 和 GPU UUID；见 [运行指南](docs/RUNBOOK.md)。权限参数是显式确认记录，不是操作系统硬隔离。
+默认只打印计划，不启动 GPU、不下载权重、不请求服务、不产生结果目录。实际执行须添加 `--execute` 并提供资源许可记录、固定模型 snapshot、revision 和 GPU UUID；见 [运行指南](docs/运行指南.md)。权限参数是显式确认记录，不是操作系统硬隔离。
 
 目前入口复用固定源码的官方 `vllm serve` 和 `vllm bench serve`，不截取引擎实现。E1 入口暂用于探索，不自动保证冷态、预热态或冻结 request trace；完成这些控制之前不能作为正式前缀实验结果。
 

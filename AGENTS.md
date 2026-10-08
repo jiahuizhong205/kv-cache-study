@@ -4,7 +4,7 @@
 - `engines/vllm` is ordinary source tracked by this monorepo, not a submodule.
   Preserve the pinned baseline identity in `configs/engine.json`; its own
   `AGENTS.md` and domain instructions apply to engine changes.
-- Read `docs/BASELINE_PROTOCOL.md` and `docs/STATUS.md` before experiment changes.
+- Read `docs/基线协议.md` and `docs/进度与审批.md` before experiment changes.
 - Never launch a model, download weights, install GPU dependencies, contact a
   remote server or terminate a process without explicit user authorization.
 - Scripts default to dry-run. Do not remove approval or source-version guards.
