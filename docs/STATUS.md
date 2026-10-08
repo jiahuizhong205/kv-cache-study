@@ -1,17 +1,20 @@
 # 当前状态与待办
 
-更新：2026-10-06。状态只描述可核验成果，不将准备工作写成已完成实验。
+更新：2026-10-08。状态只描述可核验成果，不将准备工作写成已完成实验。
 
 ## 已准备
 
-- 实验主仓库结构，Git 子模块与候选引擎身份。
+- 实验单仓库结构，完整 vLLM 源码直接纳入 `engines/vllm/`，不再使用子模块。
+- 保留原版源码 tree 与上游 commit 溯源，适配 baseline 源码保护和运行 manifest。
 - E0/E1-pilot/E3 配置，默认只预览的启动/压测/采集入口。
 - README、源码阅读路线、协作、基线与指标协议。
 - 无 GPU/模型依赖的编排测试与公开 CI。
 
-本地验证：23 项 unittest 通过；shell 语法检查通过；服务/压测/采集 dry-run 不启动模型。初始化提交的 [GitHub CPU CI](https://github.com/jiahuizhong205/kv-cache-study/actions/runs/37460545796) 已通过；这不代表 GPU 验证。
+本地验证：27 项 unittest 通过，涵盖原版 tree、已提交源码变动、未提交变动和缺失源码的保护；源码导入 tree 与上游完全一致。此前 shell 语法检查与 dry-run 已通过；转换后的 GitHub CI 待确认。历史 [GitHub CPU CI](https://github.com/jiahuizhong205/kv-cache-study/actions/runs/37460899283) 已通过；这不代表 GPU 验证。
 
-仓库创建期间独立源码镜像的历史上传遇到 HTTP 408，改用 `jiahuizhong205/vllm` 的真正 GitHub fork。最初创建的空仓库 `jiahuizhong205/vllm-kv-cache` 暂留，不参与实验，不作为子模块地址；未经另外授权不删除远程仓库。
+用户已授权删除独立 `jiahuizhong205/vllm` fork；删除结果待核验。实验主仓库不再依赖该 fork。最初创建的空仓库 `jiahuizhong205/vllm-kv-cache` 不参与实验，未纳入本次明确指定的远程 fork 删除范围。
+
+本地清理：旧的重复源码将由单仓库快照与已验证的 Git bundle 替代；历史规划、训练材料和子模块元数据移入 `.cleanup-backups/2026-10-08/`，不公开。`.venv-checks`、编辑器与工具配置仍有用途，保留。
 
 ## 未执行或尚未验收
 

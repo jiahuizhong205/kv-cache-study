@@ -1,0 +1,32 @@
+# vLLM 源码来源与单仓库版本保护
+
+## 来源
+
+- 官方项目：<https://github.com/vllm-project/vllm>。
+- 上游固定 commit：`9b2f34cad446f73b1699e8236ec0b611a65f48af`。
+- 原版完整 Git tree：`5e7882ed4ad5d34d99a29684d03d7df52fd5d574`。
+- 导入位置：`engines/vllm/`，主仓库直接跟踪，无子模块或嵌套 Git 仓库。
+- 转换日期：2026-10-08。导入前两份本地源码均无未提交改动；采用完整 tree 导入，保留文件、模式、上游 LICENSE 和版权说明。
+
+上游 commit 对象不必存在于其他成员 clone 的 Git 对象库中；来源 commit 在配置中作为溯源记录，真正运行保护比较主仓库里的源码 tree。没有将上游全部历史并入主仓库提交链。
+
+## 校验
+
+```bash
+git rev-parse HEAD:engines/vllm
+git status --porcelain -- engines/vllm
+```
+
+原版要求第一条输出固定 tree，第二条为空。树哈希覆盖已跟踪的路径、文件内容和 Git 模式；编排进一步拒绝目录内未提交/未忽略的新增文件。Git 忽略的构建产物不属于源码树，因此安装来源、扩展版本与依赖仍需独立验证，不能仅靠这个哈希证明 GPU 环境正确。
+
+导入时发现两个上游 Python blob 原本使用 CRLF。根 `.gitattributes` 为这两个文件设置例外，避免换行规范化改变上游 tree；没有修改引擎文件来适应主仓库。
+
+运行 manifest 中的 `main_sha` 标识实验仓库，`engine_tree_sha` 标识实际已提交源码，`upstream_baseline_sha` 标识来源。旧版 `engine_sha` 字段不再使用，不能把主仓库 SHA 误称为上游引擎 commit。
+
+## 更新与恢复
+
+源码升级或机制实现必须走开发分支、人工审核和实验审批，明确新源码 tree 及对照版本，不能自动跟随 upstream/main/latest。
+
+本地 `.cleanup-backups/2026-10-08/` 保存转换前的 vLLM Git 历史 bundle，以及历史计划、训练材料与旧子模块元数据。该目录被忽略，不进入公开项目。重复的旧源码文件可从当前源码快照恢复，Git 历史可从 bundle 恢复；恢复之前先确认路径与空间，不覆盖现有修改。
+
+这是代码组织转换及 CPU 编排验证，不是 GPU 构建、模型冒烟或性能复现验收。

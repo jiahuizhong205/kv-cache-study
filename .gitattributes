@@ -4,3 +4,6 @@
 *.json text eol=lf
 *.md text eol=lf
 *.yml text eol=lf
+# These upstream blobs intentionally contain CRLF; preserve the baseline tree.
+engines/vllm/tests/v1/ec_connector/integration/test_epd_correctness.py -text
+engines/vllm/vllm/config/fault_tolerance.py -text

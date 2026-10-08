@@ -1,4 +1,5 @@
 # Local material predating this experiment repository: never publish implicitly.
+/.cleanup-backups/
 /vllm/
 /vllm-reproduction-plan/
 /vllm-training-lab/

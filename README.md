@@ -5,9 +5,9 @@
 **当前阶段：阅读源码与搭建可复现实验入口。不是已完成的性能复现。**
 
 实验主仓库：[jiahuizhong205/kv-cache-study](https://github.com/jiahuizhong205/kv-cache-study)。
-引擎源码仓库：[jiahuizhong205/vllm](https://github.com/jiahuizhong205/vllm)。两者按当前要求设为 **PUBLIC**。
+现在采用 **一个 PUBLIC 单仓库**：完整 vLLM 源码直接保存在 `engines/vllm/`，不是子模块。可以在这里修改源码，和实验文件一起由主仓库提交、推送；不再依赖独立 fork。
 
-源码仓库是官方 `vllm-project/vllm` 的 GitHub fork，子模块固定到未修改的候选提交。上游地址保留为 `https://github.com/vllm-project/vllm.git`；上游 LICENSE 和版权说明未改动。源码 fork 的继承 Actions 暂禁用，主仓库仅运行 CPU 编排检查。
+源码来自官方 `vllm-project/vllm` 的固定提交，未截取或重写引擎；上游 LICENSE、版权与源码保持原样。主仓库只运行 CPU 编排检查，导入目录内的上游 workflows 不会成为本仓库的 Actions。来源及完整性见 [源码溯源](docs/SOURCE_PROVENANCE.md)。
 
 ## 1. 先从哪里开始
 
@@ -17,7 +17,7 @@
 
 1. [基线协议](docs/BASELINE_PROTOCOL.md)：我们固定什么、比较什么。
 2. [源码阅读路线](docs/SOURCE_READING.md)：代码入口、问题清单与笔记模板。
-3. [协作与子模块](docs/CONTRIBUTING.md)：源码修改如何提交、如何共享。
+3. [单仓库协作](docs/CONTRIBUTING.md)：源码修改如何提交、如何共享。
 4. [运行指南](docs/RUNBOOK.md)：审批之后如何安装、启动与采集。
 5. [指标口径](docs/METRICS.md)、[进度与审批](docs/STATUS.md)。
 
@@ -37,7 +37,7 @@
 
 ```text
 kv-cache-study/
-  engines/vllm/            # 完整引擎源码，独立 Git 子模块
+  engines/vllm/            # 完整引擎源码，主仓库直接跟踪
   configs/                # 版本身份、候选模型与实验配置
   scripts/                # 默认 dry-run 的服务/压测入口
   workloads/              # workload 规则与实验矩阵
@@ -48,7 +48,7 @@ kv-cache-study/
   results/raw/            # 本地原始结果，Git 忽略
 ```
 
-Windows 本地实际根目录目前为 `C:\Users\zhongjiahui\Desktop\vllm`，源码入口为 `engines/vllm`。原来的 `vllm/`、历史计划和训练材料暂留本地且被忽略，不会上传；不要在旧目录中开展新实验。
+Windows 本地实际根目录目前为 `C:\Users\zhongjiahui\Desktop\vllm`，源码入口为 `engines/vllm`。旧的重复源码与历史计划/训练目录已从工作区清理；可恢复备份放本地忽略目录 `.cleanup-backups/`，不上传。
 
 ## 4. 当前候选基线
 
@@ -67,24 +67,19 @@ Windows 本地实际根目录目前为 `C:\Users\zhongjiahui\Desktop\vllm`，源
 ## 5. 获取项目与日常更新
 
 ```bash
-git clone --recurse-submodules https://github.com/jiahuizhong205/kv-cache-study.git
+git clone https://github.com/jiahuizhong205/kv-cache-study.git
 cd kv-cache-study
 ```
 
-已经 clone、但 `engines/vllm` 为空：
-
-```bash
-git submodule update --init --recursive
-```
-
-主仓库更新后同步固定的子模块提交：
+日常更新（先保存自己尚未提交的修改）：
 
 ```bash
 git pull --ff-only
-git submodule update --init --recursive
 ```
 
-子模块通常处于 detached HEAD，这是复现固定提交的正常状态；**需要修改时先建立开发分支**。不要在有未提交引擎修改时盲目更新子模块。
+不需要递归 clone、子模块同步或第二次提交。**需要修改时先建立主仓库开发分支**，详见 [协作指南](docs/CONTRIBUTING.md)。旧版子模块 checkout 的成员建议在另一个新目录重新 clone；先保留自己的修改，不要直接删除旧目录。
+
+原版 baseline 以 `configs/engine.json` 的源码树哈希校验；修改引擎后直接运行原版入口会被拒绝。机制实验需要另行审批版本锁与对照方案，不能直接改锁以绕过检查。
 
 ## 6. 只预览实验命令
 
@@ -107,5 +102,5 @@ PYTHON_BIN="$PWD/.venv-checks/bin/python" ./scripts/collect_metrics.sh
 - 这个仓库是公开的；不要提交个人地址、内网服务器信息、密钥、账号密码、私有 workload 或未经授权的数据。
 - 模型权重、环境和原始请求响应不提交。模型有独立许可证，使用/分享前核对对应模型条款。
 - 公开结果只放脱敏摘要，必须保留实验身份、失败率与测量定义。
-- 采用双层提交：先推送引擎开发提交，再提交主仓库子模块指针。
+- 只提交一个仓库；记录主仓库 commit、引擎 tree SHA 与上游来源 commit，区分原版和机制版本。
 - 引擎保留上游许可。本仓库自写实验编排目前未额外授予开源许可证，公开可见不等于自动获得任意再分发许可；团队确认后再统一选择许可。

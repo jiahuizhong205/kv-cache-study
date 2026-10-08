@@ -125,10 +125,33 @@ class RunnerTests(unittest.TestCase):
                 if "://" in link or link.startswith("#"):
                     continue
                 target = (document.parent / link.split("#")[0]).resolve()
-                # Public CPU CI intentionally does not download the engine.
-                if target.is_relative_to(ROOT / "engines"):
-                    continue
                 self.assertTrue(target.exists(), f"Broken link in {document.name}: {link}")
+
+    def test_unchanged_baseline_tree_accepted(self):
+        lock = runner.read_json(ROOT / "configs/engine.json")
+        with patch.object(runner, "git_value", side_effect=[lock["baseline_tree_sha"], ""]) as git:
+            runner.validate_engine_snapshot(lock)
+        self.assertEqual(git.call_args_list[1].args, (ROOT, "status", "--porcelain", "--", "engines/vllm"))
+
+    def test_committed_engine_change_denied(self):
+        lock = runner.read_json(ROOT / "configs/engine.json")
+        with patch.object(runner, "git_value", return_value="0" * 40):
+            with self.assertRaisesRegex(ValueError, "tree differs"):
+                runner.validate_engine_snapshot(lock)
+
+    def test_uncommitted_engine_changes_denied(self):
+        lock = runner.read_json(ROOT / "configs/engine.json")
+        for status in (" M engines/vllm/file.py", "M  engines/vllm/file.py", "?? engines/vllm/new.py"):
+            with self.subTest(status=status):
+                with patch.object(runner, "git_value", side_effect=[lock["baseline_tree_sha"], status]):
+                    with self.assertRaisesRegex(ValueError, "changes"):
+                        runner.validate_engine_snapshot(lock)
+
+    def test_missing_source_tree_denied(self):
+        import subprocess
+        with patch.object(runner, "git_value", side_effect=subprocess.CalledProcessError(128, "git")):
+            with self.assertRaises(subprocess.CalledProcessError):
+                runner.validate_engine_snapshot(runner.read_json(ROOT / "configs/engine.json"))
 
 
 if __name__ == "__main__":

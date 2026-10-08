@@ -1,6 +1,6 @@
 # vLLM 源码阅读路线：围绕 KV Cache
 
-所有链接指向 `engines/vllm`，当前固定提交 `9b2f34cad446f73b1699e8236ec0b611a65f48af`。先阅读上游 [AGENTS.md](../engines/vllm/AGENTS.md)；本阶段只读，无需运行 CUDA。
+所有链接指向主仓库直接跟踪的 `engines/vllm`，当前上游来源提交 `9b2f34cad446f73b1699e8236ec0b611a65f48af`，版本身份见 [源码溯源](SOURCE_PROVENANCE.md)。先阅读上游 [AGENTS.md](../engines/vllm/AGENTS.md)；本阶段只读，无需运行 CUDA。
 
 ## 1. 一个请求的主路径
 

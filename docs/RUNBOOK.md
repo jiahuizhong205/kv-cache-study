@@ -28,6 +28,8 @@ Windows 也可用隔离环境的 `Scripts/python.exe scripts/runner.py server --
 
 审批后按照固定提交的安装文档与 AGENTS.md，用 uv 创建 `.venv`。vLLM 在此环境以 `engines/vllm` editable 源码安装；预编译扩展要与提交匹配，若不可用则讨论固定发行版或构建方案，不能自动切浮动 nightly。记录依赖锁后再 GPU 冒烟。
 
+单仓库注意：引擎没有独立 Git HEAD，上游构建的 Git 自动探测可能读到主仓库身份或缺少发行版标签。安装前由环境负责人核查固定源码 `setup.py` 的 `VLLM_VERSION_OVERRIDE` 与 `VLLM_PRECOMPILED_WHEEL_COMMIT`，显式采用经确认的版本和上游 commit，而不是当前主仓库 commit；预编译 wheel 要验证存在、匹配 CUDA/torch/硬件并记录来源。不能只设置一个版本字符串就声称扩展兼容。这里尚未验证单仓库 GPU 构建，不能直接把上游通用安装命令视为已跑通。
+
 验证环境使用的是这个源码副本：
 
 ```bash

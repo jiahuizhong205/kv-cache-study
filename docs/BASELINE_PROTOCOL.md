@@ -2,9 +2,9 @@
 
 ## 1. 实验身份
 
-引擎固定提交见 `configs/engine.json`。模型候选见 `configs/models.json`，revision 的 null 表示尚未确认，绝不是 main/latest 的别名。
+引擎直接纳入主仓库。上游来源提交与原版源码树哈希见 `configs/engine.json`、[源码溯源](SOURCE_PROVENANCE.md)；原版入口检查源码树不变，不再读取子模块 HEAD。模型候选见 `configs/models.json`，revision 的 null 表示尚未确认，绝不是 main/latest 的别名。
 
-实际运行前记录：主仓库 SHA、引擎 SHA、模型/tokenizer snapshot revision、torch/runtime/backend、GPU UUID/型号、硬件预约、启动 CLI、KV token 容量/block size、workload 及统计窗口。环境冻结清单放 `configs/locks/`，目前没有经过 GPU 验证的 lockfile。
+实际运行前记录：主仓库 commit SHA、engine tree SHA、上游 baseline commit、模型/tokenizer snapshot revision、torch/runtime/backend、GPU UUID/型号、硬件预约、启动 CLI、KV token 容量/block size、workload 及统计窗口。来源 commit 不代表机制修改后的身份，engine tree 与主仓库 commit 才标识本次代码。环境冻结清单放 `configs/locks/`，目前没有经过 GPU 验证的 lockfile。
 
 首选单卡 TP=1、BF16。模型为普通 GQA/full-attention：7B 的 KV 约为 56 KiB/token，计算来自 `2 × 28 layers × 4 KV heads × 128 head_dim × 2 bytes`，不包括分页/保留块。2/4/8 GiB KV 池约容纳 37449/74898/149797 token；启动日志的实际容量优先于手算。
 

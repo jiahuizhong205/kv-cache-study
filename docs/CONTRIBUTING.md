@@ -1,40 +1,45 @@
-# 协作与子模块
+# 单仓库协作
 
-## 1. 两层版本
+## 1. 只管理一个项目
 
-主仓库管理协议/workload/分析；`engines/vllm` 管理引擎源码。子模块指针固定到 commit，不自动跟随 baseline/main。
+`kv-cache-study` 管理实验协议、workload、分析和 `engines/vllm/` 的完整源码。引擎目录没有独立 `.git`，不是子模块；在该目录执行 Git 命令也作用于主仓库。
 
-源码仓库 origin 是团队公开研究副本；upstream 为官方 `https://github.com/vllm-project/vllm.git`。新 clone 通常只自动获得 origin，可自行添加 upstream。当前 baseline 未改动上游代码，保留 LICENSE 和版权。
+上游来源、固定 commit 与源码树身份见 [源码溯源](SOURCE_PROVENANCE.md)。`configs/engine.json` 的 `baseline_sha` 是上游来源，不是主仓库 HEAD；实验记录同时保存主仓库 commit 和 engine tree SHA。
 
-## 2. 只读阶段
+## 2. 阅读与引擎开发
 
-阅读笔记放 `docs/notes/`。不需要修改引擎，也不需要启动服务。主仓库的提交不会自动保存子模块未提交的文件修改。
+阅读笔记放 `docs/notes/`，无需 GPU。修改引擎前阅读 [上游 AGENTS.md](../engines/vllm/AGENTS.md) 及对应区域规范；使用上游 uv 开发环境，人工审核每一处修改并运行相关测试。当前不自动向官方提交 PR。
 
-## 3. 引擎开发
-
-先阅读子模块自己的 AGENTS.md 和对应区域规范。上游要求 uv 环境、测试及人类审核；当前研究副本同样保留这些规范，不自动向官方提 PR。
-
-示例（由成员在需要机制开发时手动执行）：
+从主仓库根目录开始，示例由成员需要开发时手动执行：
 
 ```bash
-cd engines/vllm
-git switch -c mechanism/topic-name
-# 修改、审核、测试后提交；需要写权限
-git add <reviewed-files>
-git commit -m "Implement mechanism: topic-name"
-git push -u origin mechanism/topic-name
-cd ../..
-git add engines/vllm
-git commit -m "Pin mechanism engine revision"
-git push --recurse-submodules=check
+git switch -c codex/mechanism-topic
+# 修改 engines/vllm/...；补充测试和说明
+git diff -- engines/vllm
+# 指定已审核文件，避免把环境、权重、原始结果加入提交
+git add engines/vllm/vllm/path/to/changed.py docs/notes/topic.md
+git commit -m "Implement mechanism: topic"
+git push -u origin codex/mechanism-topic
 ```
 
-不要把机制分支覆盖 baseline。A 组原版实验引用最初固定 SHA，机制实验记录自己的 SHA。主仓库切分支后子模块可能需要同步，但在有未提交引擎更改时先保护工作，不盲目更新或 reset。
+路径是占位示例，不是待执行命令。只需一次提交、一次推送，GitHub 主仓库即包含源码变化。为方便审核，尽量将引擎机制修改和 workload/分析修改拆成不同提交；PR 说明测试、输出影响与 AI 辅助情况，遵守上游贡献要求。
+
+## 3. 不覆盖原版 baseline
+
+当前 `engines/vllm` 导入的是未修改上游候选源码。A 组原版入口校验已提交的 engine tree 与目录内未提交修改；修改源码或提交修改后的源码，都会拒绝按原版运行。
+
+B/C 组在开发分支修改；获审批后再定义机制版本锁、实验入口和同配置原版对照。不要随手改 `baseline_tree_sha` 让检查通过。可在另一个 clone 中保留已验收的原版快照，两边记录各自 commit/tree，不需要新的 GitHub 项目。
+
+提交后的源码树身份可查询：
+
+```bash
+git rev-parse HEAD
+git rev-parse HEAD:engines/vllm
+git status --short -- engines/vllm
+```
 
 ## 4. 环境与共享
 
-可修改源码不等于环境正在使用该源码。用对应版本的 editable 安装，核查 `vllm.__file__`；修改 Python 后重启服务，C++/CUDA 修改按上游流程重编译。不要把浮动 nightly 预编译扩展冒充固定提交。
+修改文件不等于运行环境已使用该文件。采用 `engines/vllm` editable 安装，核查 `vllm.__file__`；Python 修改后重启自己的服务，C++/CUDA 修改按上游流程重编译。单仓库安装的版本元数据注意事项见 [运行指南](RUNBOOK.md)。
 
-两个仓库需要分别给成员写权限；一个仓库权限不自动赋予另一个。只读成员可以通过公开仓库 clone；没有写权限的成员通过自己分支/PR 协作。
-
-参考：[Git 子模块](https://git-scm.com/book/en/v2/Git-Tools-Submodules)、[源码安装](https://docs.vllm.ai/en/latest/getting_started/installation/gpu/)。
+只需要为 `kv-cache-study` 配置成员写权限；只读成员可以 clone，有写权限的成员通过分支/PR 协作。不要提交私有地址、密钥、模型权重或原始请求。旧版 checkout 若仍有子模块元数据，先保存修改，再在新目录正常 clone。

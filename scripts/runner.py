@@ -85,6 +85,15 @@ def git_value(path, *args):
     return subprocess.check_output(["git", "-C", str(path), *args], text=True).strip()
 
 
+def validate_engine_snapshot(lock):
+    """Accept only a committed, unchanged source tree matching the baseline."""
+    tree = git_value(ROOT, "rev-parse", "HEAD:engines/vllm")
+    if tree != lock["baseline_tree_sha"]:
+        raise ValueError("Engine tree differs from baseline lock; approve another protocol first")
+    if git_value(ROOT, "status", "--porcelain", "--", "engines/vllm"):
+        raise ValueError("Baseline engine has staged, unstaged or untracked changes")
+
+
 def validate_url(value):
     url = urllib.parse.urlparse(value)
     if url.scheme not in ("http", "https") or not url.hostname or url.username or url.password:
@@ -108,10 +117,7 @@ def validate_execution(args, cfg, model_id):
         raise ValueError("Provide a previously downloaded local --model-dir snapshot")
     lock = read_json(ROOT / "configs/engine.json")
     engine = ROOT / "engines/vllm"
-    if git_value(engine, "rev-parse", "HEAD") != lock["baseline_sha"]:
-        raise ValueError("Engine HEAD differs from baseline lock; approve another protocol first")
-    if git_value(engine, "status", "--porcelain"):
-        raise ValueError("Baseline engine has uncommitted changes")
+    validate_engine_snapshot(lock)
     py = ROOT / ".venv/bin/python"
     if not py.is_file() or not (ROOT / ".venv/bin/vllm").is_file():
         raise ValueError("Install and validate the pinned engine in .venv first")
@@ -222,7 +228,9 @@ def main(argv=None):
         output.mkdir(parents=True, exist_ok=False)
         plan.update({"utc_started": utc(), "main_sha": git_value(ROOT, "rev-parse", "HEAD"),
                      "main_dirty": bool(git_value(ROOT, "status", "--porcelain")),
-                     "engine_sha": git_value(ROOT / "engines/vllm", "rev-parse", "HEAD"),
+                     "upstream_baseline_sha": read_json(ROOT / "configs/engine.json")["baseline_sha"],
+                     "engine_tree_sha": git_value(ROOT, "rev-parse", "HEAD:engines/vllm"),
+                     "engine_dirty": bool(git_value(ROOT, "status", "--porcelain", "--", "engines/vllm")),
                      "config_sha256": hashlib.sha256(json.dumps(cfg, sort_keys=True).encode()).hexdigest()})
         manifest = output / "manifest.json"
         manifest.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
